@@ -1,111 +1,55 @@
-import json
-from datetime import datetime
+tasks = list(input("Please Enter Your Tasks"))
 
-try:
-    with open('todo_list.json', 'r') as file:
-        todo_list = json.load(file)
-except FileNotFoundError:
-    todo_list = []
+def add_task(description):
+    task = {"id": len(tasks) + 1, "description": description, "status": "Pending"}
+    tasks.append(task)
+    print(f"Task added: {description}")
 
-def save_todo_list():
-    with open('todo_list.json', 'w') as file:
-        json.dump(todo_list, file, indent=4)
+def view_tasks():
+    if not tasks:
+        print("No tasks in the to-do list.")
+    else:
+        for task in tasks:
+            print(f"{task['id']}. {task['description']} - {task['status']}")
 
-def add_task(description, priority, due_date, assigned_to, category, notes, dependencies):
-    task = {
-        'Task Description': description,
-        'Priority': priority,
-        'Due Date': due_date,
-        'Status': 'Not Started',
-        'Assigned To': assigned_to,
-        'Category': category,
-        'Notes': notes,
-        'Dependencies': dependencies,
-        'Progress': 0
-    }
-    todo_list.append(task)
-    save_todo_list()
+def complete_task(task_id):
+    for task in tasks:
+        if task['id'] == task_id:
+            task['status'] = "Completed"
+            print(f"Task {task_id} marked as complete.")
+            break
+    else:
+        print("Task not found.")
 
-def update_status(task_index, status):
-    todo_list[task_index]['Status'] = status
-    save_todo_list()
+def delete_task(task_id):
+    global tasks
+    tasks = [task for task in tasks if task['id'] != task_id]
+    print(f"Task {task_id} deleted.")
 
-def update_progress(task_index, progress):
-    todo_list[task_index]['Progress'] = progress
-    save_todo_list()
-
-def check_overdue_tasks():
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    for task in todo_list:
-        if task['Due Date'] < current_date and task['Status'] != 'Completed':
-            task['Status'] = 'Overdue'
-    save_todo_list()
-
-def filter_tasks(filter_type, filter_value):
-    filtered_tasks = [task for task in todo_list if task[filter_type] == filter_value]
-    return filtered_tasks
-
-def display_todo_list(tasks=None):
-    if tasks is None:
-        tasks = todo_list
-    for index, task in enumerate(tasks):
-        print(f"Task {index + 1}: {task['Task Description']}")
-        print(f"Priority: {task['Priority']}")
-        print(f"Due Date: {task['Due Date']}")
-        print(f"Status: {task['Status']}")
-        print(f"Assigned To: {task['Assigned To']}")
-        print(f"Category: {task['Category']}")
-        print(f"Notes: {task['Notes']}")
-        print(f"Dependencies: {task['Dependencies']}")
-        print(f"Progress: {task['Progress']}%")
-        print("-" * 40)
-
-def main():
-    check_overdue_tasks()
-    
+def menu():
     while True:
-        print("\nTo-Do List Menu:")
-        print("1. Add a new task")
-        print("2. Update task status")
-        print("3. Update task progress")
-        print("4. Display to-do list")
-        print("5. Filter tasks")
-        print("6. Exit")
+        print("\n--- To-Do List Menu ---")
+        print("1. Add task")
+        print("2. View tasks")
+        print("3. Complete task")
+        print("4. Delete task")
+        print("5. Exit")
 
-        choice = input("Enter your choice: ")
+        choice = input("Enter your choice (1-5): ")
 
         if choice == '1':
             description = input("Enter task description: ")
-            priority = input("Enter priority (High/Medium/Low): ")
-            due_date = input("Enter due date (YYYY-MM-DD): ")
-            assigned_to = input("Enter assigned to: ")
-            category = input("Enter category: ")
-            notes = input("Enter any notes: ")
-            dependencies = input("Enter dependencies: ")
-            add_task(description, priority, due_date, assigned_to, category, notes, dependencies)
-            print("Task added successfully!")
+            add_task(description)
         elif choice == '2':
-            task_index = int(input("Enter task number to update status: ")) - 1
-            status = input("Enter new status (Not Started/In Progress/Completed): ")
-            update_status(task_index, status)
-            print("Task status updated successfully!")
+            view_tasks()
         elif choice == '3':
-            task_index = int(input("Enter task number to update progress: ")) - 1
-            progress = int(input("Enter new progress percentage (0-100): "))
-            update_progress(task_index, progress)
-            print("Task progress updated successfully!")
+            task_id = int(input("Enter task ID to mark as complete: "))
+            complete_task(task_id)
         elif choice == '4':
-            display_todo_list()
+            task_id = int(input("Enter task ID to delete: "))
+            delete_task(task_id)
         elif choice == '5':
-            filter_type = input("Filter by (Priority/Status/Category): ")
-            filter_value = input(f"Enter the {filter_type} to filter by: ")
-            filtered_tasks = filter_tasks(filter_type, filter_value)
-            display_todo_list(filtered_tasks)
-        elif choice == '6':
-            print("Exiting the to-do list application.")
+            print("Exiting the To-Do List.")
             break
         else:
             print("Invalid choice, please try again.")
-
-if __name__ == "__main__":
-    main()
